@@ -1,0 +1,13 @@
+{
+    auto_https disable_redirects
+}
+
+localhost:9443 {
+    tls internal
+    reverse_proxy https://localhost:8443 {
+        transport http {
+            tls_insecure_skip_verify
+            versions h2c 2
+        }
+    }
+}

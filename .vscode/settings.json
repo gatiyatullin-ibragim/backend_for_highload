@@ -1,0 +1,13 @@
+{
+    "editor.acceptSuggestionOnCommitCharacter": false,
+    "editor.acceptSuggestionOnEnter": "off",
+    "editor.inlineSuggest.edits.allowCodeShifting": "never",
+    "editor.inlineSuggest.edits.renderSideBySide": "never",
+    "editor.inlineSuggest.enabled": false,
+    "editor.inlineSuggest.syntaxHighlightingEnabled": false,
+    "editor.snippetSuggestions": "none",
+    "editor.suggest.selectionMode": "never",
+    "editor.inlineSuggest.edits.showLongDistanceHint": false,
+    "editor.inlineSuggest.experimental.emptyResponseInformation": false,
+    "java.compile.nullAnalysis.mode": "disabled"
+}
