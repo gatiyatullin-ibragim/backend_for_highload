@@ -1,0 +1,33 @@
+// Какие методы есть и какие данные принимаются и возвращаются.
+syntax = "proto3";
+
+package notification;
+
+option go_package = "notification-service/pb;pb";
+
+service NotificationService {
+  rpc SendNotification (SendRequest) returns (SendResponse);
+  rpc GetStatus (StatusRequest) returns (StatusResponse);
+}
+
+message SendRequest {
+  string idempotency_key = 1;
+  string user_id = 1;
+  string template_id = 2;
+  string channel = 3; // push, email, sms, in-app
+  string payload = 4;
+}
+
+message SendResponse {
+  string notification_id = 1;
+  string status = 2; // accepted
+}
+
+message StatusRequest {
+  string notification_id = 1;
+}
+
+message StatusResponse {
+  string notification_id = 1;
+  string status = 2; // delivered / failed / in_queue
+}
