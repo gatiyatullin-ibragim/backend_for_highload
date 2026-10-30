@@ -16,6 +16,7 @@ import (
 
 // Server реализует интерфейс NotificationServiceServer
 type Server struct {
+	//заглушка
 	pb.UnimplementedNotificationServiceServer
 
 	mu            sync.RWMutex
@@ -25,6 +26,7 @@ type Server struct {
 
 // 1. Метод принятия уведомления с поддержкой идемпотентности
 func (s *Server) SendNotification(ctx context.Context, req *pb.SendRequest) (*pb.SendResponse, error) {
+	//лок блокирует доступ к мапе для остальных горутин обеспечивая потокобезопасность
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -63,6 +65,7 @@ func (s *Server) SendNotification(ctx context.Context, req *pb.SendRequest) (*pb
 
 // 2. Метод получения статуса
 func (s *Server) GetStatus(ctx context.Context, req *pb.StatusRequest) (*pb.StatusResponse, error) {
+	//ReadLock потому что только читаем данные и ничего не записываем
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
