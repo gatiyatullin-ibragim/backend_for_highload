@@ -12,10 +12,10 @@ service NotificationService {
 
 message SendRequest {
   string idempotency_key = 1;
-  string user_id = 1;
-  string template_id = 2;
-  string channel = 3; // push, email, sms, in-app
-  string payload = 4;
+  string user_id = 2;
+  string template_id = 3;
+  string channel = 4; // push, email, sms, in-app
+  string payload = 5;
 }
 
 message SendResponse {

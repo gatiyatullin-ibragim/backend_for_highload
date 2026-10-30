@@ -24,13 +24,14 @@ const (
 )
 
 type SendRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	TemplateId    string                 `protobuf:"bytes,2,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`
-	Channel       string                 `protobuf:"bytes,3,opt,name=channel,proto3" json:"channel,omitempty"` // push, email, sms, in-app
-	Payload       string                 `protobuf:"bytes,4,opt,name=payload,proto3" json:"payload,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	IdempotencyKey string                 `protobuf:"bytes,1,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	TemplateId     string                 `protobuf:"bytes,3,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`
+	Channel        string                 `protobuf:"bytes,4,opt,name=channel,proto3" json:"channel,omitempty"` // push, email, sms, in-app
+	Payload        string                 `protobuf:"bytes,5,opt,name=payload,proto3" json:"payload,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *SendRequest) Reset() {
@@ -61,6 +62,13 @@ func (x *SendRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use SendRequest.ProtoReflect.Descriptor instead.
 func (*SendRequest) Descriptor() ([]byte, []int) {
 	return file_notification_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *SendRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
 }
 
 func (x *SendRequest) GetUserId() string {
@@ -243,13 +251,14 @@ var File_notification_proto protoreflect.FileDescriptor
 
 const file_notification_proto_rawDesc = "" +
 	"\n" +
-	"\x12notification.proto\x12\fnotification\"{\n" +
-	"\vSendRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n" +
-	"\vtemplate_id\x18\x02 \x01(\tR\n" +
+	"\x12notification.proto\x12\fnotification\"\xa4\x01\n" +
+	"\vSendRequest\x12'\n" +
+	"\x0fidempotency_key\x18\x01 \x01(\tR\x0eidempotencyKey\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1f\n" +
+	"\vtemplate_id\x18\x03 \x01(\tR\n" +
 	"templateId\x12\x18\n" +
-	"\achannel\x18\x03 \x01(\tR\achannel\x12\x18\n" +
-	"\apayload\x18\x04 \x01(\tR\apayload\"O\n" +
+	"\achannel\x18\x04 \x01(\tR\achannel\x12\x18\n" +
+	"\apayload\x18\x05 \x01(\tR\apayload\"O\n" +
 	"\fSendResponse\x12'\n" +
 	"\x0fnotification_id\x18\x01 \x01(\tR\x0enotificationId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"8\n" +
