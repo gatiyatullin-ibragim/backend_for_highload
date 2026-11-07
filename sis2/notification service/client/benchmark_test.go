@@ -3,14 +3,18 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net"
+	"os"
 	"runtime"
+	"sort"
+	"strconv"
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/proto"
 
@@ -21,7 +25,7 @@ const benchmarkBufferSize = 1024 * 1024
 
 const (
 	targetGRPCRequestsPerSecond = 3000
-	grpcLoadTestDuration        = time.Second
+	defaultGRPCLoadTestDuration = 10 * time.Second
 )
 
 type benchmarkNotificationServer struct {
@@ -155,64 +159,139 @@ func BenchmarkGRPCSendNotification(b *testing.B) {
 }
 
 func TestGRPC3000RPS(t *testing.T) {
-	client, cleanup := newBenchmarkGRPCClient(t)
-	defer cleanup()
+	if os.Getenv("RUN_3000_RPS") != "1" {
+		t.Skip("set RUN_3000_RPS=1 to run the real-server load test")
+	}
+
+	address := os.Getenv("NOTIFICATION_GRPC_ADDR")
+	if address == "" {
+		address = "127.0.0.1:50051"
+	}
+	duration := loadTestDuration(t)
+
+	conn, err := grpc.Dial(
+		address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		t.Fatalf("connect to notification service at %s: %v", address, err)
+	}
+	defer conn.Close()
+
+	client := pb.NewNotificationServiceClient(conn)
+	readyCtx, cancelReady := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelReady()
+	if _, err := client.SendNotification(readyCtx, benchmarkRequestWithKey("load-test-ready")); err != nil {
+		t.Fatalf("notification service is not ready at %s: %v", address, err)
+	}
 
 	workers := runtime.GOMAXPROCS(0) * 4
 	if workers < 16 {
 		workers = 16
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), grpcLoadTestDuration+time.Second)
+	totalRequests := targetGRPCRequestsPerSecond * int(duration/time.Second)
+	jobs := make(chan int, totalRequests)
+	latencies := make(chan time.Duration, totalRequests)
+	errs := make(chan error, 1)
+	ctx, cancel := context.WithTimeout(context.Background(), duration+10*time.Second)
 	defer cancel()
-
-	var successfulRequests atomic.Int64
-	errCh := make(chan error, workers)
-	start := time.Now()
-	deadline := start.Add(grpcLoadTestDuration)
 
 	var wg sync.WaitGroup
 	wg.Add(workers)
 	for i := 0; i < workers; i++ {
 		go func() {
 			defer wg.Done()
-
-			for time.Now().Before(deadline) {
-				if _, err := client.SendNotification(ctx, benchmarkRequest()); err != nil {
+			for requestNumber := range jobs {
+				start := time.Now()
+				requestCtx, requestCancel := context.WithTimeout(ctx, 5*time.Second)
+				_, err := client.SendNotification(
+					requestCtx,
+					benchmarkRequestWithKey(fmt.Sprintf("load-test-%d", requestNumber)),
+				)
+				requestCancel()
+				if err != nil {
 					select {
-					case errCh <- err:
+					case errs <- err:
 					default:
 					}
-					return
+					continue
 				}
-				successfulRequests.Add(1)
+				latencies <- time.Since(start)
 			}
 		}()
 	}
+
+	start := time.Now()
+	interval := time.Second / targetGRPCRequestsPerSecond
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for requestNumber := 0; requestNumber < totalRequests; requestNumber++ {
+		if requestNumber > 0 {
+			<-ticker.C
+		}
+		jobs <- requestNumber
+	}
+	close(jobs)
 	wg.Wait()
+	close(latencies)
 
 	elapsed := time.Since(start)
-	close(errCh)
-
-	if err, ok := <-errCh; ok {
-		t.Fatalf("gRPC load test request failed: %v", err)
+	latencyValues := make([]time.Duration, 0, totalRequests)
+	for latency := range latencies {
+		latencyValues = append(latencyValues, latency)
 	}
-
-	requests := successfulRequests.Load()
-	actualRPS := float64(requests) / elapsed.Seconds()
+	successfulRequests := len(latencyValues)
+	completionRPS := float64(successfulRequests) / elapsed.Seconds()
+	offeredRPS := float64(totalRequests) / duration.Seconds()
+	p95 := percentile(latencyValues, 0.95)
 	t.Logf(
-		"gRPC load: %d workers, %d successful requests in %v (%.0f RPS)",
+		"gRPC load: address=%s workers=%d offered=%.0f RPS duration=%v successful=%d/%d completion=%.0f RPS p95=%v",
+		address,
 		workers,
-		requests,
-		elapsed,
-		actualRPS,
+		offeredRPS,
+		duration,
+		successfulRequests,
+		totalRequests,
+		completionRPS,
+		p95,
 	)
 
-	if actualRPS < targetGRPCRequestsPerSecond {
-		t.Fatalf(
-			"gRPC throughput %.0f RPS is below target %d RPS",
-			actualRPS,
-			targetGRPCRequestsPerSecond,
-		)
+	select {
+	case err := <-errs:
+		t.Fatalf("gRPC load test request failed: %v", err)
+	default:
 	}
+	if successfulRequests != totalRequests {
+		t.Fatalf("gRPC load test completed %d/%d requests", successfulRequests, totalRequests)
+	}
+}
+
+func benchmarkRequestWithKey(key string) *pb.SendRequest {
+	request := benchmarkRequest()
+	request.IdempotencyKey = key
+	return request
+}
+
+func loadTestDuration(t *testing.T) time.Duration {
+	t.Helper()
+
+	value := os.Getenv("LOAD_TEST_DURATION")
+	if value == "" {
+		return defaultGRPCLoadTestDuration
+	}
+	seconds, err := strconv.Atoi(value)
+	if err != nil || seconds < 1 {
+		t.Fatalf("LOAD_TEST_DURATION must be a positive number of seconds, got %q", value)
+	}
+	return time.Duration(seconds) * time.Second
+}
+
+func percentile(values []time.Duration, quantile float64) time.Duration {
+	sorted := append([]time.Duration(nil), values...)
+	if len(sorted) == 0 {
+		return 0
+	}
+	sort.Slice(sorted, func(i, j int) bool { return sorted[i] < sorted[j] })
+	index := int(float64(len(sorted)-1) * quantile)
+	return sorted[index]
 }

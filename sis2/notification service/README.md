@@ -17,3 +17,21 @@ Architectural tradeoff: The internal circuit between microservices is implemente
 how to run project?
 go run server/main.go
 
+## Load test: 3000 RPS
+
+The load test uses a real TCP gRPC connection to the running notification
+service. It sends 3000 requests per second with unique idempotency keys and
+reports successful requests, achieved RPS, and p95 latency.
+
+From this directory, in two terminals:
+
+```bash
+go run server/main.go
+RUN_3000_RPS=1 LOAD_TEST_DURATION=10 \
+  go test ./client -run '^TestGRPC3000RPS$' -count=1 -v
+```
+
+`LOAD_TEST_DURATION` is specified in seconds and defaults to 10. Set
+`NOTIFICATION_GRPC_ADDR` when the service listens on a different address.
+Regular `go test ./client` skips this load test so unit tests do not require a
+running service.
