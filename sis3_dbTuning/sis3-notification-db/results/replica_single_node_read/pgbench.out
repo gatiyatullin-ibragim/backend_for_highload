@@ -1,0 +1,69 @@
+pgbench (16.15 (Ubuntu 16.15-0ubuntu0.24.04.1))
+starting vacuum...pgbench: error: ERROR:  relation "pgbench_branches" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+pgbench: error: ERROR:  relation "pgbench_tellers" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+pgbench: error: ERROR:  relation "pgbench_history" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+end.
+transaction type: multiple scripts
+scaling factor: 1
+query mode: prepared
+number of clients: 48
+number of threads: 4
+maximum number of tries: 1
+duration: 40 s
+number of transactions actually processed: 60284
+number of failed transactions: 0 (0.000%)
+latency average = 3.917 ms
+latency stddev = 13.945 ms
+rate limit schedule lag: avg 0.831 (max 184.770) ms
+initial connection time = 215.474 ms
+tps = 1507.484823 (without initial connection time)
+SQL script 1: bench/scripts/prefs_lookup.sql
+ - weight: 300 (targets 64.4% of total)
+ - 38670 transactions (64.1% of total, tps = 966.996850)
+ - number of failed transactions: 0 (0.000%)
+ - latency average = 2.809 ms
+ - latency stddev = 10.719 ms
+ - statement latencies in milliseconds and failures:
+         0.001           0  \set uid random(1, 200000)
+         1.272           0  SELECT user_id, push_on, email_on, sms_on, quiet_from, quiet_to, tz, locale FROM user_preferences WHERE user_id = :uid;
+         0.750           0  SELECT platform, token FROM devices WHERE user_id = :uid;
+SQL script 2: bench/scripts/inbox_page.sql
+ - weight: 70 (targets 15.0% of total)
+ - 9233 transactions (15.3% of total, tps = 230.883939)
+ - number of failed transactions: 0 (0.000%)
+ - latency average = 3.438 ms
+ - latency stddev = 10.565 ms
+ - statement latencies in milliseconds and failures:
+         0.001           0  \set uid random(1, 200000)
+         2.653           0  SELECT id, created_at, channel, title, is_read FROM notifications WHERE user_id = :uid ORDER BY created_at DESC, id DESC LIMIT 
+SQL script 3: bench/scripts/inbox_older.sql
+ - weight: 25 (targets 5.4% of total)
+ - 3161 transactions (5.2% of total, tps = 79.045178)
+ - number of failed transactions: 0 (0.000%)
+ - latency average = 11.328 ms
+ - latency stddev = 17.692 ms
+ - statement latencies in milliseconds and failures:
+         0.001           0  \set uid random(1, 200000)
+         0.000           0  \set days random(1, 25)
+        10.113           0  SELECT id, created_at, channel, title, is_read FROM notifications
+SQL script 4: bench/scripts/unread_count.sql
+ - weight: 70 (targets 15.0% of total)
+ - 9106 transactions (15.1% of total, tps = 227.708128)
+ - number of failed transactions: 0 (0.000%)
+ - latency average = 4.871 ms
+ - latency stddev = 12.872 ms
+ - statement latencies in milliseconds and failures:
+         0.001           0  \set uid random(1, 200000)
+         3.938           0  SELECT count(*) FROM notifications WHERE user_id = :uid AND NOT is_read;
+SQL script 5: bench/scripts/fanout.sql
+ - weight: 1 (targets 0.2% of total)
+ - 114 transactions (0.2% of total, tps = 2.850728)
+ - number of failed transactions: 0 (0.000%)
+ - latency average = 136.627 ms
+ - latency stddev = 115.172 ms
+ - statement latencies in milliseconds and failures:
+         0.001           0  \set last random(1, 199000)
+       135.247           0  SELECT p.user_id, d.token FROM user_preferences p JOIN devices d ON d.user_id = p.user_id

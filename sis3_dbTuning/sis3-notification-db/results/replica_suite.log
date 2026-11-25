@@ -1,0 +1,9 @@
+waiting for server to start.... done
+server started
+127.0.0.1|streaming|async
+[replica_single_node_read] tps=1507.1 p50=1.744 p95=9.87 p99=65.098 ms  sustained=True
+[replica_single_node_write] tps=1979.1 p50=62.057 p95=839.927 p99=1007.121 ms  sustained=False
+[replica_with_replica_read] tps=1515.7 p50=0.671 p95=5.136 p99=19.485 ms  sustained=True
+[replica_with_replica_write] tps=1977.5 p50=1.184 p95=11.034 p99=36.677 ms  sustained=True
+--- staleness (idle replica)
+{"n": 300, "p50_ms": 0.48, "p95_ms": 0.66, "p99_ms": 0.96, "max_ms": 3.5}

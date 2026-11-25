@@ -1,0 +1,23 @@
+pgbench (16.15 (Ubuntu 16.15-0ubuntu0.24.04.1))
+starting vacuum...pgbench: error: ERROR:  relation "pgbench_branches" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+pgbench: error: ERROR:  relation "pgbench_tellers" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+pgbench: error: ERROR:  relation "pgbench_history" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+end.
+transaction type: bench/scripts/unread_count.sql
+scaling factor: 1
+query mode: prepared
+number of clients: 8
+number of threads: 4
+maximum number of tries: 1
+duration: 20 s
+number of transactions actually processed: 533081
+number of failed transactions: 0 (0.000%)
+latency average = 0.300 ms
+initial connection time = 15.089 ms
+tps = 26673.769918 (without initial connection time)
+statement latencies in milliseconds and failures:
+         0.000           0  \set uid random(1, 200000)
+         0.298           0  SELECT count(*) FROM notifications WHERE user_id = :uid AND NOT is_read;

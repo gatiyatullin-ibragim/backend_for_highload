@@ -1,0 +1,535 @@
+=================== prefs_lookup_1 (v2) ===================
+SELECT user_id, push_on, email_on, sms_on, quiet_from, quiet_to, tz, locale FROM user_preferences WHERE user_id = 12345;
+-------------------
+Index Scan using user_preferences_pkey on user_preferences  (cost=0.42..2.64 rows=1 width=44) (actual time=0.029..0.029 rows=1 loops=1)
+  Index Cond: (user_id = 12345)
+  Buffers: shared hit=7
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=82
+Planning Time: 0.268 ms
+Execution Time: 0.062 ms
+
+=================== prefs_lookup_2_devices (v2) ===================
+SELECT platform, token FROM devices WHERE user_id = 12345;
+-------------------
+Index Only Scan using devices_user_idx on devices  (cost=0.42..1.56 rows=2 width=71) (actual time=0.029..0.030 rows=2 loops=1)
+  Index Cond: (user_id = 12345)
+  Heap Fetches: 0
+  Buffers: shared hit=7
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=117
+Planning Time: 0.379 ms
+Execution Time: 0.062 ms
+
+=================== inbox_page (v2) ===================
+SELECT id, created_at, channel, title, is_read FROM notifications WHERE user_id = 12345 ORDER BY created_at DESC, id DESC LIMIT 20;
+-------------------
+Limit  (cost=12.83..40.15 rows=20 width=42) (actual time=0.052..0.247 rows=20 loops=1)
+  Buffers: shared hit=48
+  ->  Append  (cost=12.83..216.37 rows=149 width=42) (actual time=0.051..0.244 rows=20 loops=1)
+        Buffers: shared hit=48
+        ->  Index Scan using notifications_20261128_user_id_created_at_id_idx on notifications_20261128 notifications_33  (cost=0.12..2.34 rows=1 width=51) (actual time=0.016..0.017 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=5
+        ->  Index Scan using notifications_20261127_user_id_created_at_id_idx on notifications_20261127 notifications_32  (cost=0.12..2.34 rows=1 width=51) (actual time=0.001..0.001 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=2
+        ->  Index Scan using notifications_20261126_user_id_created_at_id_idx on notifications_20261126 notifications_31  (cost=0.12..2.34 rows=1 width=51) (actual time=0.003..0.003 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=2
+        ->  Index Scan using notifications_20261125_user_id_created_at_id_idx on notifications_20261125 notifications_30  (cost=0.12..2.34 rows=1 width=42) (actual time=0.007..0.007 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=1
+        ->  Index Scan using notifications_20261124_user_id_created_at_id_idx on notifications_20261124 notifications_29  (cost=0.42..7.11 rows=5 width=42) (actual time=0.022..0.022 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261123_user_id_created_at_id_idx on notifications_20261123 notifications_28  (cost=0.42..7.11 rows=5 width=42) (actual time=0.019..0.073 rows=9 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=12
+        ->  Index Scan using notifications_20261122_user_id_created_at_id_idx on notifications_20261122 notifications_27  (cost=0.42..7.11 rows=5 width=42) (actual time=0.018..0.027 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=5
+        ->  Index Scan using notifications_20261121_user_id_created_at_id_idx on notifications_20261121 notifications_26  (cost=0.42..7.11 rows=5 width=42) (actual time=0.018..0.036 rows=4 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=7
+        ->  Index Scan using notifications_20261120_user_id_created_at_id_idx on notifications_20261120 notifications_25  (cost=0.42..7.11 rows=5 width=42) (actual time=0.019..0.034 rows=3 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=6
+        ->  Index Scan using notifications_20261119_user_id_created_at_id_idx on notifications_20261119 notifications_24  (cost=0.42..7.11 rows=5 width=42) (actual time=0.020..0.020 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261118_user_id_created_at_id_idx on notifications_20261118 notifications_23  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261117_user_id_created_at_id_idx on notifications_20261117 notifications_22  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261116_user_id_created_at_id_idx on notifications_20261116 notifications_21  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261115_user_id_created_at_id_idx on notifications_20261115 notifications_20  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261114_user_id_created_at_id_idx on notifications_20261114 notifications_19  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261113_user_id_created_at_id_idx on notifications_20261113 notifications_18  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261112_user_id_created_at_id_idx on notifications_20261112 notifications_17  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261111_user_id_created_at_id_idx on notifications_20261111 notifications_16  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261110_user_id_created_at_id_idx on notifications_20261110 notifications_15  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261109_user_id_created_at_id_idx on notifications_20261109 notifications_14  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261108_user_id_created_at_id_idx on notifications_20261108 notifications_13  (cost=0.42..7.11 rows=5 width=42) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261107_user_id_created_at_id_idx on notifications_20261107 notifications_12  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261106_user_id_created_at_id_idx on notifications_20261106 notifications_11  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261105_user_id_created_at_id_idx on notifications_20261105 notifications_10  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261104_user_id_created_at_id_idx on notifications_20261104 notifications_9  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261103_user_id_created_at_id_idx on notifications_20261103 notifications_8  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261102_user_id_created_at_id_idx on notifications_20261102 notifications_7  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261101_user_id_created_at_id_idx on notifications_20261101 notifications_6  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261031_user_id_created_at_id_idx on notifications_20261031 notifications_5  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261030_user_id_created_at_id_idx on notifications_20261030 notifications_4  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261029_user_id_created_at_id_idx on notifications_20261029 notifications_3  (cost=0.42..7.11 rows=5 width=41) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261028_user_id_created_at_id_idx on notifications_20261028 notifications_2  (cost=0.42..7.11 rows=5 width=40) (never executed)
+              Index Cond: (user_id = 12345)
+        ->  Index Scan using notifications_20261027_user_id_created_at_id_idx on notifications_20261027 notifications_1  (cost=0.42..7.11 rows=5 width=39) (never executed)
+              Index Cond: (user_id = 12345)
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=2794
+Planning Time: 3.833 ms
+Execution Time: 0.445 ms
+
+=================== inbox_older (v2) ===================
+SELECT id, created_at, channel, title, is_read FROM notifications WHERE user_id = 12345 AND created_at < now() - 10 * interval '1 day' ORDER BY created_at DESC, id DESC LIMIT 20;
+-------------------
+Limit  (cost=12.99..41.97 rows=20 width=42) (actual time=0.037..0.154 rows=20 loops=1)
+  Buffers: shared hit=41
+  ->  Append  (cost=12.99..175.29 rows=112 width=42) (actual time=0.036..0.152 rows=20 loops=1)
+        Buffers: shared hit=41
+        Subplans Removed: 13
+        ->  Index Scan using notifications_20261115_user_id_created_at_id_idx on notifications_20261115 notifications_20  (cost=0.43..6.01 rows=4 width=42) (actual time=0.035..0.042 rows=3 loops=1)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+              Buffers: shared hit=9
+        ->  Index Scan using notifications_20261114_user_id_created_at_id_idx on notifications_20261114 notifications_19  (cost=0.43..7.13 rows=5 width=42) (actual time=0.012..0.018 rows=3 loops=1)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+              Buffers: shared hit=6
+        ->  Index Scan using notifications_20261113_user_id_created_at_id_idx on notifications_20261113 notifications_18  (cost=0.43..7.13 rows=5 width=42) (actual time=0.017..0.032 rows=8 loops=1)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+              Buffers: shared hit=11
+        ->  Index Scan using notifications_20261112_user_id_created_at_id_idx on notifications_20261112 notifications_17  (cost=0.43..7.13 rows=5 width=42) (actual time=0.019..0.027 rows=4 loops=1)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+              Buffers: shared hit=7
+        ->  Index Scan using notifications_20261111_user_id_created_at_id_idx on notifications_20261111 notifications_16  (cost=0.43..7.13 rows=5 width=42) (actual time=0.015..0.015 rows=1 loops=1)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261110_user_id_created_at_id_idx on notifications_20261110 notifications_15  (cost=0.43..7.13 rows=5 width=42) (actual time=0.015..0.015 rows=1 loops=1)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261109_user_id_created_at_id_idx on notifications_20261109 notifications_14  (cost=0.43..7.13 rows=5 width=42) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261108_user_id_created_at_id_idx on notifications_20261108 notifications_13  (cost=0.43..7.13 rows=5 width=42) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261107_user_id_created_at_id_idx on notifications_20261107 notifications_12  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261106_user_id_created_at_id_idx on notifications_20261106 notifications_11  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261105_user_id_created_at_id_idx on notifications_20261105 notifications_10  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261104_user_id_created_at_id_idx on notifications_20261104 notifications_9  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261103_user_id_created_at_id_idx on notifications_20261103 notifications_8  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261102_user_id_created_at_id_idx on notifications_20261102 notifications_7  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261101_user_id_created_at_id_idx on notifications_20261101 notifications_6  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261031_user_id_created_at_id_idx on notifications_20261031 notifications_5  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261030_user_id_created_at_id_idx on notifications_20261030 notifications_4  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261029_user_id_created_at_id_idx on notifications_20261029 notifications_3  (cost=0.43..7.13 rows=5 width=41) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261028_user_id_created_at_id_idx on notifications_20261028 notifications_2  (cost=0.43..7.13 rows=5 width=40) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+        ->  Index Scan using notifications_20261027_user_id_created_at_id_idx on notifications_20261027 notifications_1  (cost=0.43..7.13 rows=5 width=39) (never executed)
+              Index Cond: ((user_id = 12345) AND (created_at < (now() - '10 days'::interval)))
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=2794
+Planning Time: 4.022 ms
+Execution Time: 0.373 ms
+
+=================== unread_count (v2) ===================
+SELECT count(*) FROM notifications WHERE user_id = 12345 AND NOT is_read;
+-------------------
+Aggregate  (cost=45.80..45.81 rows=1 width=8) (actual time=0.931..0.945 rows=1 loops=1)
+  Buffers: shared hit=102
+  ->  Append  (cost=0.42..45.72 rows=33 width=0) (actual time=0.202..0.931 rows=19 loops=1)
+        Buffers: shared hit=102
+        ->  Index Only Scan using notifications_20261027_user_id_idx on notifications_20261027 notifications_1  (cost=0.42..1.54 rows=1 width=0) (actual time=0.087..0.087 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=6
+        ->  Index Only Scan using notifications_20261028_user_id_idx on notifications_20261028 notifications_2  (cost=0.42..1.54 rows=1 width=0) (actual time=0.022..0.022 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261029_user_id_idx on notifications_20261029 notifications_3  (cost=0.42..1.54 rows=1 width=0) (actual time=0.022..0.022 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261030_user_id_idx on notifications_20261030 notifications_4  (cost=0.42..1.54 rows=1 width=0) (actual time=0.025..0.025 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261031_user_id_idx on notifications_20261031 notifications_5  (cost=0.42..1.54 rows=1 width=0) (actual time=0.044..0.045 rows=3 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261101_user_id_idx on notifications_20261101 notifications_6  (cost=0.42..1.54 rows=1 width=0) (actual time=0.026..0.027 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261102_user_id_idx on notifications_20261102 notifications_7  (cost=0.42..1.54 rows=1 width=0) (actual time=0.029..0.029 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261103_user_id_idx on notifications_20261103 notifications_8  (cost=0.42..1.54 rows=1 width=0) (actual time=0.025..0.025 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261104_user_id_idx on notifications_20261104 notifications_9  (cost=0.42..1.54 rows=1 width=0) (actual time=0.022..0.022 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261105_user_id_idx on notifications_20261105 notifications_10  (cost=0.42..1.54 rows=1 width=0) (actual time=0.025..0.025 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261106_user_id_idx on notifications_20261106 notifications_11  (cost=0.42..1.54 rows=1 width=0) (actual time=0.033..0.033 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261107_user_id_idx on notifications_20261107 notifications_12  (cost=0.42..1.54 rows=1 width=0) (actual time=0.045..0.045 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261108_user_id_idx on notifications_20261108 notifications_13  (cost=0.42..1.54 rows=1 width=0) (actual time=0.039..0.040 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261109_user_id_idx on notifications_20261109 notifications_14  (cost=0.42..1.54 rows=1 width=0) (actual time=0.035..0.036 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261110_user_id_idx on notifications_20261110 notifications_15  (cost=0.42..1.54 rows=1 width=0) (actual time=0.036..0.037 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261111_user_id_idx on notifications_20261111 notifications_16  (cost=0.42..1.54 rows=1 width=0) (actual time=0.020..0.020 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261112_user_id_idx on notifications_20261112 notifications_17  (cost=0.42..1.54 rows=1 width=0) (actual time=0.021..0.021 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261113_user_id_idx on notifications_20261113 notifications_18  (cost=0.42..1.54 rows=1 width=0) (actual time=0.028..0.029 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261114_user_id_idx on notifications_20261114 notifications_19  (cost=0.42..1.54 rows=1 width=0) (actual time=0.041..0.042 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261115_user_id_idx on notifications_20261115 notifications_20  (cost=0.42..1.54 rows=1 width=0) (actual time=0.023..0.023 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261116_user_id_idx on notifications_20261116 notifications_21  (cost=0.42..1.54 rows=1 width=0) (actual time=0.030..0.030 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261117_user_id_idx on notifications_20261117 notifications_22  (cost=0.42..1.54 rows=1 width=0) (actual time=0.034..0.035 rows=3 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261118_user_id_idx on notifications_20261118 notifications_23  (cost=0.42..1.54 rows=1 width=0) (actual time=0.026..0.027 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=4
+        ->  Index Only Scan using notifications_20261119_user_id_idx on notifications_20261119 notifications_24  (cost=0.42..1.54 rows=1 width=0) (actual time=0.015..0.015 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261120_user_id_idx on notifications_20261120 notifications_25  (cost=0.42..1.54 rows=1 width=0) (actual time=0.018..0.019 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261121_user_id_idx on notifications_20261121 notifications_26  (cost=0.42..1.54 rows=1 width=0) (actual time=0.049..0.049 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261122_user_id_idx on notifications_20261122 notifications_27  (cost=0.42..1.54 rows=1 width=0) (actual time=0.017..0.018 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261123_user_id_idx on notifications_20261123 notifications_28  (cost=0.42..1.54 rows=1 width=0) (actual time=0.023..0.023 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Index Only Scan using notifications_20261124_user_id_idx on notifications_20261124 notifications_29  (cost=0.42..1.54 rows=1 width=0) (actual time=0.018..0.018 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Heap Fetches: 0
+              Buffers: shared hit=3
+        ->  Seq Scan on notifications_20261125 notifications_30  (cost=0.00..1.01 rows=1 width=0) (actual time=0.010..0.010 rows=0 loops=1)
+              Filter: ((NOT is_read) AND (user_id = 12345))
+              Rows Removed by Filter: 1
+              Buffers: shared hit=1
+        ->  Seq Scan on notifications_20261126 notifications_31  (cost=0.00..0.00 rows=1 width=0) (actual time=0.002..0.002 rows=0 loops=1)
+              Filter: ((NOT is_read) AND (user_id = 12345))
+        ->  Seq Scan on notifications_20261127 notifications_32  (cost=0.00..0.00 rows=1 width=0) (actual time=0.001..0.002 rows=0 loops=1)
+              Filter: ((NOT is_read) AND (user_id = 12345))
+        ->  Seq Scan on notifications_20261128 notifications_33  (cost=0.00..0.00 rows=1 width=0) (actual time=0.003..0.004 rows=0 loops=1)
+              Filter: ((NOT is_read) AND (user_id = 12345))
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=2413
+Planning Time: 8.386 ms
+Execution Time: 1.351 ms
+
+=================== mark_read (v2) ===================
+UPDATE notifications SET is_read = true WHERE user_id = 12345 AND NOT is_read;
+-------------------
+Update on notifications  (cost=0.42..77.62 rows=0 width=0) (actual time=2.170..2.181 rows=0 loops=1)
+  Update on notifications_20261027 notifications_1
+  Update on notifications_20261028 notifications_2
+  Update on notifications_20261029 notifications_3
+  Update on notifications_20261030 notifications_4
+  Update on notifications_20261031 notifications_5
+  Update on notifications_20261101 notifications_6
+  Update on notifications_20261102 notifications_7
+  Update on notifications_20261103 notifications_8
+  Update on notifications_20261104 notifications_9
+  Update on notifications_20261105 notifications_10
+  Update on notifications_20261106 notifications_11
+  Update on notifications_20261107 notifications_12
+  Update on notifications_20261108 notifications_13
+  Update on notifications_20261109 notifications_14
+  Update on notifications_20261110 notifications_15
+  Update on notifications_20261111 notifications_16
+  Update on notifications_20261112 notifications_17
+  Update on notifications_20261113 notifications_18
+  Update on notifications_20261114 notifications_19
+  Update on notifications_20261115 notifications_20
+  Update on notifications_20261116 notifications_21
+  Update on notifications_20261117 notifications_22
+  Update on notifications_20261118 notifications_23
+  Update on notifications_20261119 notifications_24
+  Update on notifications_20261120 notifications_25
+  Update on notifications_20261121 notifications_26
+  Update on notifications_20261122 notifications_27
+  Update on notifications_20261123 notifications_28
+  Update on notifications_20261124 notifications_29
+  Update on notifications_20261125 notifications_30
+  Update on notifications_20261126 notifications_31
+  Update on notifications_20261127 notifications_32
+  Update on notifications_20261128 notifications_33
+  Buffers: shared hit=343
+  ->  Append  (cost=0.42..77.62 rows=33 width=11) (actual time=0.200..0.912 rows=19 loops=1)
+        Buffers: shared hit=110
+        ->  Index Scan using notifications_20261027_user_id_idx on notifications_20261027 notifications_1  (cost=0.42..2.64 rows=1 width=11) (actual time=0.044..0.044 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=6
+        ->  Index Scan using notifications_20261028_user_id_idx on notifications_20261028 notifications_2  (cost=0.42..2.64 rows=1 width=11) (actual time=0.052..0.052 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261029_user_id_idx on notifications_20261029 notifications_3  (cost=0.42..2.64 rows=1 width=11) (actual time=0.022..0.022 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261030_user_id_idx on notifications_20261030 notifications_4  (cost=0.42..2.64 rows=1 width=11) (actual time=0.020..0.020 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261031_user_id_idx on notifications_20261031 notifications_5  (cost=0.42..2.64 rows=1 width=11) (actual time=0.060..0.075 rows=3 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=6
+        ->  Index Scan using notifications_20261101_user_id_idx on notifications_20261101 notifications_6  (cost=0.42..2.64 rows=1 width=11) (actual time=0.023..0.024 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261102_user_id_idx on notifications_20261102 notifications_7  (cost=0.42..2.64 rows=1 width=11) (actual time=0.022..0.022 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261103_user_id_idx on notifications_20261103 notifications_8  (cost=0.42..2.64 rows=1 width=11) (actual time=0.019..0.020 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261104_user_id_idx on notifications_20261104 notifications_9  (cost=0.42..2.64 rows=1 width=11) (actual time=0.025..0.025 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261105_user_id_idx on notifications_20261105 notifications_10  (cost=0.42..2.64 rows=1 width=11) (actual time=0.018..0.019 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261106_user_id_idx on notifications_20261106 notifications_11  (cost=0.42..2.64 rows=1 width=11) (actual time=0.015..0.015 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261107_user_id_idx on notifications_20261107 notifications_12  (cost=0.42..2.64 rows=1 width=11) (actual time=0.031..0.032 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261108_user_id_idx on notifications_20261108 notifications_13  (cost=0.42..2.64 rows=1 width=11) (actual time=0.033..0.034 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261109_user_id_idx on notifications_20261109 notifications_14  (cost=0.42..2.64 rows=1 width=11) (actual time=0.024..0.031 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=5
+        ->  Index Scan using notifications_20261110_user_id_idx on notifications_20261110 notifications_15  (cost=0.42..2.64 rows=1 width=11) (actual time=0.027..0.028 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261111_user_id_idx on notifications_20261111 notifications_16  (cost=0.42..2.64 rows=1 width=11) (actual time=0.014..0.014 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261112_user_id_idx on notifications_20261112 notifications_17  (cost=0.42..2.64 rows=1 width=11) (actual time=0.015..0.015 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261113_user_id_idx on notifications_20261113 notifications_18  (cost=0.42..2.64 rows=1 width=11) (actual time=0.028..0.036 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=5
+        ->  Index Scan using notifications_20261114_user_id_idx on notifications_20261114 notifications_19  (cost=0.42..2.64 rows=1 width=11) (actual time=0.023..0.023 rows=1 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=4
+        ->  Index Scan using notifications_20261115_user_id_idx on notifications_20261115 notifications_20  (cost=0.42..2.64 rows=1 width=11) (actual time=0.019..0.019 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261116_user_id_idx on notifications_20261116 notifications_21  (cost=0.42..2.64 rows=1 width=11) (actual time=0.031..0.043 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=5
+        ->  Index Scan using notifications_20261117_user_id_idx on notifications_20261117 notifications_22  (cost=0.42..2.64 rows=1 width=11) (actual time=0.029..0.057 rows=3 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=6
+        ->  Index Scan using notifications_20261118_user_id_idx on notifications_20261118 notifications_23  (cost=0.42..2.64 rows=1 width=11) (actual time=0.048..0.062 rows=2 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=5
+        ->  Index Scan using notifications_20261119_user_id_idx on notifications_20261119 notifications_24  (cost=0.42..2.64 rows=1 width=11) (actual time=0.013..0.013 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261120_user_id_idx on notifications_20261120 notifications_25  (cost=0.42..2.64 rows=1 width=11) (actual time=0.019..0.019 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261121_user_id_idx on notifications_20261121 notifications_26  (cost=0.42..2.64 rows=1 width=11) (actual time=0.049..0.049 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261122_user_id_idx on notifications_20261122 notifications_27  (cost=0.42..2.64 rows=1 width=11) (actual time=0.017..0.018 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261123_user_id_idx on notifications_20261123 notifications_28  (cost=0.42..2.64 rows=1 width=11) (actual time=0.022..0.022 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Index Scan using notifications_20261124_user_id_idx on notifications_20261124 notifications_29  (cost=0.42..2.64 rows=1 width=11) (actual time=0.018..0.019 rows=0 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (NOT is_read)
+              Buffers: shared hit=3
+        ->  Seq Scan on notifications_20261125 notifications_30  (cost=0.00..1.01 rows=1 width=11) (actual time=0.008..0.008 rows=0 loops=1)
+              Filter: ((NOT is_read) AND (user_id = 12345))
+              Rows Removed by Filter: 1
+              Buffers: shared hit=1
+        ->  Seq Scan on notifications_20261126 notifications_31  (cost=0.00..0.00 rows=1 width=11) (actual time=0.002..0.002 rows=0 loops=1)
+              Filter: ((NOT is_read) AND (user_id = 12345))
+        ->  Seq Scan on notifications_20261127 notifications_32  (cost=0.00..0.00 rows=1 width=11) (actual time=0.002..0.002 rows=0 loops=1)
+              Filter: ((NOT is_read) AND (user_id = 12345))
+        ->  Seq Scan on notifications_20261128 notifications_33  (cost=0.00..0.00 rows=1 width=11) (actual time=0.003..0.003 rows=0 loops=1)
+              Filter: ((NOT is_read) AND (user_id = 12345))
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=2416
+Planning Time: 6.177 ms
+Execution Time: 3.063 ms
+
+=================== insert (v2) ===================
+INSERT INTO notifications (id, user_id, created_at, channel, title, body, status, is_read) VALUES (nextval('notif_id_seq'), 12345, now(), 1, 'Your order has shipped', 'Track your parcel in the app', 1, false);
+-------------------
+Insert on notifications  (cost=0.00..0.01 rows=0 width=0) (actual time=0.442..0.443 rows=0 loops=1)
+  Buffers: shared hit=101
+  ->  Result  (cost=0.00..0.01 rows=1 width=93) (actual time=0.084..0.084 rows=1 loops=1)
+        Buffers: shared hit=13
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=3
+Planning Time: 0.078 ms
+Execution Time: 0.801 ms
+
+=================== status_update (v2) ===================
+UPDATE notifications SET status = 3 WHERE id = 25000000 AND created_at >= to_timestamp(1795541200) AND created_at < to_timestamp(1795541200 + 1);
+-------------------
+Update on notifications  (cost=0.42..2.65 rows=0 width=0) (actual time=0.113..0.113 rows=0 loops=1)
+  Update on notifications_20261124 notifications_1
+  Buffers: shared hit=17
+  ->  Index Scan using notifications_20261124_pkey on notifications_20261124 notifications_1  (cost=0.42..2.65 rows=1 width=12) (actual time=0.053..0.053 rows=1 loops=1)
+        Index Cond: ((id = 25000000) AND (created_at >= '2026-11-24 22:26:40+05'::timestamp with time zone) AND (created_at < '2026-11-24 22:26:41+05'::timestamp with time zone))
+        Buffers: shared hit=7
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=334
+Planning Time: 0.770 ms
+Execution Time: 0.179 ms
+
+=================== fanout (v2) ===================
+SELECT p.user_id, d.token FROM user_preferences p JOIN devices d ON d.user_id = p.user_id WHERE p.push_on AND p.user_id > 100000 ORDER BY p.user_id LIMIT 1000;
+-------------------
+Limit  (cost=2.04..102.75 rows=1000 width=73) (actual time=26.688..27.053 rows=1000 loops=1)
+  Buffers: shared hit=2698
+  ->  Merge Join  (cost=2.04..18105.98 rows=179751 width=73) (actual time=26.687..26.995 rows=1000 loops=1)
+        Merge Cond: (p.user_id = d.user_id)
+        Buffers: shared hit=2698
+        ->  Index Scan using user_preferences_pkey on user_preferences p  (cost=0.42..3182.11 rows=92431 width=8) (actual time=0.019..0.097 rows=500 loops=1)
+              Index Cond: (user_id > 100000)
+              Filter: push_on
+              Rows Removed by Filter: 37
+              Buffers: shared hit=14
+        ->  Index Only Scan using devices_user_idx on devices d  (cost=0.42..11895.32 rows=400000 width=73) (actual time=0.006..18.413 rows=201074 loops=1)
+              Heap Fetches: 0
+              Buffers: shared hit=2684
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=172
+Planning Time: 0.631 ms
+Execution Time: 27.167 ms
+

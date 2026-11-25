@@ -1,0 +1,57 @@
+=================== prefs_lookup_1 (v1) ===================
+Planning Time: 0.399 ms
+Execution Time: 0.069 ms
+=================== prefs_lookup_2_devices (v1) ===================
+Planning Time: 0.509 ms
+Execution Time: 0.085 ms
+=================== inbox_page (v1) ===================
+Planning Time: 0.411 ms
+Execution Time: 0.166 ms
+=================== inbox_older (v1) ===================
+Planning Time: 0.426 ms
+Execution Time: 0.214 ms
+=================== unread_count (v1) ===================
+Planning Time: 0.405 ms
+Execution Time: 0.130 ms
+=================== mark_read (v1) ===================
+Planning Time: 0.407 ms
+Execution Time: 0.578 ms
+=================== insert (v1) ===================
+Planning Time: 0.082 ms
+Execution Time: 0.386 ms
+=================== status_update (v1) ===================
+Planning Time: 0.567 ms
+Execution Time: 0.149 ms
+=================== fanout (v1) ===================
+Planning Time: 0.605 ms
+Execution Time: 27.915 ms
+[v1_one_prefs_lookup] tps=14650.6 p50=0.509 p95=0.816 p99=1.118 ms  sustained=True
+[v1_one_inbox_page] tps=10743.0 p50=0.666 p95=1.418 p99=2.051 ms  sustained=True
+[v1_one_inbox_older] tps=4259.4 p50=1.688 p95=3.893 p99=5.468 ms  sustained=True
+[v1_one_unread_count] tps=26654.0 p50=0.281 p95=0.481 p99=0.719 ms  sustained=True
+[v1_one_mark_read] tps=252.3 p50=30.994 p95=48.241 p99=58.978 ms  sustained=True
+[v1_one_insert] tps=2629.3 p50=2.991 p95=4.966 p99=6.374 ms  sustained=True
+[v1_one_status_update] tps=14248.1 p50=0.52 p95=0.915 p99=1.433 ms  sustained=True
+[v1_one_fanout] tps=78.3 p50=99.292 p95=205.139 p99=236.933 ms  sustained=True
+[v1_cold_prefs_lookup] tps=15546.9 p50=0.474 p95=0.782 p99=1.113 ms  sustained=True
+[v1_cold_inbox_page] tps=5743.6 p50=0.771 p95=5.043 p99=10.588 ms  sustained=True
+[v1_cold_inbox_older] tps=1497.7 p50=5.024 p95=9.612 p99=12.517 ms  sustained=True
+[v1_cold_unread_count] tps=14557.1 p50=0.324 p95=1.837 p99=3.694 ms  sustained=True
+[v1_mix_low] tps=101.0 p50=0.954 p95=1.894 p99=3.659 ms  sustained=True
+   prefs_lookup   tps=    27.7 p50=    0.56 p95=    1.17 p99=    2.02 max=     7.2
+   inbox_page     tps=     6.2 p50=    1.33 p95=    1.99 p99=    2.48 max=     2.6
+   inbox_older    tps=     2.2 p50=    1.70 p95=    2.90 p99=    5.64 max=     7.0
+   unread_count   tps=     6.6 p50=    0.50 p95=    0.95 p99=    1.32 max=     2.7
+   mark_read      tps=     0.5 p50=    8.79 p95=   12.22 p99=   15.38 max=    16.3
+   insert         tps=    29.6 p50=    1.25 p95=    2.01 p99=    3.11 max=     7.8
+   status_update  tps=    28.1 p50=    0.89 p95=    1.53 p99=    2.47 max=     6.8
+   fanout         tps=     0.1 p50=   14.04 p95=   26.41 p99=   27.46 max=    27.7
+[v1_mix_max] tps=4016.3 p50=3.092 p95=8.982 p99=14.79 ms  sustained=True
+   prefs_lookup   tps=  1129.2 p50=    0.83 p95=    2.74 p99=    4.36 max=    36.4
+   inbox_page     tps=   257.3 p50=    1.99 p95=    5.84 p99=    8.28 max=    41.5
+   inbox_older    tps=    92.7 p50=    5.63 p95=   10.46 p99=   14.00 max=    49.1
+   unread_count   tps=   259.4 p50=    0.35 p95=    1.77 p99=    3.05 max=    26.9
+   mark_read      tps=    25.7 p50=   59.47 p95=   91.89 p99=  104.71 max=   121.4
+   insert         tps=  1127.1 p50=    5.75 p95=   10.52 p99=   13.94 max=    47.1
+   status_update  tps=  1121.6 p50=    4.06 p95=    8.41 p99=   11.90 max=    40.3
+   fanout         tps=     3.3 p50=   92.75 p95=  210.51 p99=  239.87 max=   277.5
