@@ -1,0 +1,66 @@
+=================== prefs_lookup_1 (v2w) ===================
+Planning Time: 0.350 ms
+Execution Time: 0.060 ms
+=================== prefs_lookup_2_devices (v2w) ===================
+Planning Time: 0.393 ms
+Execution Time: 0.051 ms
+=================== inbox_page (v2w) ===================
+Planning Time: 1.228 ms
+Execution Time: 0.267 ms
+=================== inbox_older (v2w) ===================
+Planning Time: 1.145 ms
+Execution Time: 0.187 ms
+=================== unread_count (v2w) ===================
+Planning Time: 1.086 ms
+Execution Time: 0.307 ms
+=================== mark_read (v2w) ===================
+Planning Time: 1.034 ms
+Execution Time: 0.750 ms
+=================== insert (v2w) ===================
+Planning Time: 0.053 ms
+Execution Time: 0.399 ms
+=================== status_update (v2w) ===================
+Planning Time: 0.530 ms
+Execution Time: 0.178 ms
+=================== fanout (v2w) ===================
+Planning Time: 0.550 ms
+Execution Time: 27.032 ms
+[v2w_one_prefs_lookup] tps=15197.6 p50=0.495 p95=0.745 p99=0.984 ms  sustained=True
+[v2w_one_inbox_page] tps=10035.8 p50=0.729 p95=1.542 p99=2.256 ms  sustained=True
+[v2w_one_inbox_older] tps=3520.9 p50=2.111 p95=4.409 p99=5.448 ms  sustained=True
+[v2w_one_unread_count] tps=14104.0 p50=0.55 p95=0.922 p99=1.313 ms  sustained=True
+[v2w_one_mark_read] tps=189.0 p50=42.072 p95=59.098 p99=67.924 ms  sustained=True
+[v2w_one_insert] tps=12375.1 p50=0.627 p95=1.016 p99=1.352 ms  sustained=True
+[v2w_one_status_update] tps=7181.4 p50=1.001 p95=2.06 p99=2.849 ms  sustained=True
+[v2w_one_fanout] tps=80.1 p50=99.875 p95=193.343 p99=211.239 ms  sustained=True
+[v2w_cold_prefs_lookup] tps=16151.6 p50=0.463 p95=0.711 p99=0.96 ms  sustained=True
+[v2w_cold_inbox_page] tps=5716.6 p50=0.819 p95=4.816 p99=9.783 ms  sustained=True
+[v2w_cold_inbox_older] tps=1919.2 p50=4.011 p95=7.668 p99=9.675 ms  sustained=True
+[v2w_cold_unread_count] tps=8228.4 p50=0.678 p95=2.596 p99=4.904 ms  sustained=True
+[v2w_mix_low] tps=98.8 p50=0.856 p95=1.929 p99=4.203 ms  sustained=True
+   prefs_lookup   tps=    27.5 p50=    0.54 p95=    1.13 p99=    2.31 max=    26.8
+   inbox_page     tps=     6.9 p50=    1.45 p95=    2.74 p99=    4.16 max=    22.0
+   inbox_older    tps=     2.4 p50=    1.91 p95=    3.80 p99=    4.26 max=     5.7
+   unread_count   tps=     7.3 p50=    0.62 p95=    1.35 p99=    2.01 max=     3.2
+   mark_read      tps=     0.5 p50=   11.97 p95=   19.09 p99=   19.70 max=    19.9
+   insert         tps=    27.8 p50=    0.90 p95=    1.52 p99=    2.56 max=    10.6
+   status_update  tps=    26.3 p50=    0.97 p95=    1.65 p99=    2.78 max=    35.4
+   fanout         tps=     0.1 p50=    9.67 p95=   58.30 p99=   62.62 max=    63.7
+[v2w_mix_max] tps=4263.3 p50=2.905 p95=7.784 p99=13.737 ms  sustained=True
+   prefs_lookup   tps=  1194.1 p50=    1.02 p95=    2.71 p99=    4.87 max=    42.6
+   inbox_page     tps=   275.8 p50=    2.63 p95=    6.21 p99=    9.09 max=    34.6
+   inbox_older    tps=    97.1 p50=    7.08 p95=   12.06 p99=   15.80 max=    39.3
+   unread_count   tps=   278.4 p50=    0.57 p95=    2.12 p99=    4.57 max=    16.2
+   mark_read      tps=    27.7 p50=   75.58 p95=  110.66 p99=  125.03 max=   135.2
+   insert         tps=  1196.7 p50=    3.81 p95=    7.90 p99=   11.66 max=    74.7
+   status_update  tps=  1189.6 p50=    4.23 p95=    8.19 p99=   11.70 max=    53.7
+   fanout         tps=     3.9 p50=   94.17 p95=  215.58 p99=  240.45 max=   259.4
+[v2w_mix_cal] tps=1990.1 p50=0.598 p95=3.752 p99=38.022 ms  sustained=True
+   prefs_lookup   tps=   560.1 p50=    0.36 p95=    1.76 p99=   13.97 max=   255.6
+   inbox_page     tps=   129.2 p50=    0.62 p95=    2.76 p99=   10.76 max=   267.7
+   inbox_older    tps=    46.8 p50=    1.73 p95=    6.51 p99=   18.49 max=   318.0
+   unread_count   tps=   129.5 p50=    0.47 p95=    2.09 p99=   10.81 max=   236.6
+   mark_read      tps=    12.7 p50=   16.19 p95=   52.87 p99=  111.37 max=   421.2
+   insert         tps=   553.9 p50=    0.62 p95=    3.84 p99=   14.60 max=   247.8
+   status_update  tps=   556.3 p50=    0.80 p95=    4.28 p99=   34.49 max=   272.2
+   fanout         tps=     1.7 p50=   32.83 p95=  106.11 p99=  246.23 max=   548.8

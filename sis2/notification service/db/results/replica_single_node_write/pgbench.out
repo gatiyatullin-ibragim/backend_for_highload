@@ -1,0 +1,50 @@
+pgbench (16.15 (Ubuntu 16.15-0ubuntu0.24.04.1))
+starting vacuum...pgbench: error: ERROR:  relation "pgbench_branches" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+pgbench: error: ERROR:  relation "pgbench_tellers" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+pgbench: error: ERROR:  relation "pgbench_history" does not exist
+pgbench: detail: (ignoring this error and continuing anyway)
+end.
+transaction type: multiple scripts
+scaling factor: 1
+query mode: prepared
+number of clients: 16
+number of threads: 4
+maximum number of tries: 1
+duration: 40 s
+number of transactions actually processed: 79165
+number of failed transactions: 0 (0.000%)
+latency average = 108.055 ms
+latency stddev = 139.866 ms
+rate limit schedule lag: avg 102.161 (max 548.523) ms
+initial connection time = 30.880 ms
+tps = 1958.658536 (without initial connection time)
+SQL script 1: bench/scripts/mark_read.sql
+ - weight: 7 (targets 1.2% of total)
+ - 917 transactions (1.2% of total, tps = 22.687929)
+ - number of failed transactions: 0 (0.000%)
+ - latency average = 193.512 ms
+ - latency stddev = 164.802 ms
+ - statement latencies in milliseconds and failures:
+         0.001           0  \set uid random(1, 200000)
+        85.139           0  UPDATE notifications SET is_read = true WHERE user_id = :uid AND NOT is_read;
+SQL script 2: bench/scripts/insert.sql
+ - weight: 300 (targets 49.4% of total)
+ - 39128 transactions (49.4% of total, tps = 968.084270)
+ - number of failed transactions: 0 (0.000%)
+ - latency average = 106.949 ms
+ - latency stddev = 139.651 ms
+ - statement latencies in milliseconds and failures:
+         0.001           0  \set uid random(1, 200000)
+         4.704           0  INSERT INTO notifications (id, user_id, created_at, channel, title, body, status, is_read)
+SQL script 3: bench/scripts/status_update.sql
+ - weight: 300 (targets 49.4% of total)
+ - 39120 transactions (49.4% of total, tps = 967.886338)
+ - number of failed transactions: 0 (0.000%)
+ - latency average = 107.163 ms
+ - latency stddev = 138.822 ms
+ - statement latencies in milliseconds and failures:
+         0.001           0  \set id random(24192001, 25056000)
+         0.001           0  \set ts :base + :id / 10
+         5.223           0  UPDATE notifications SET status = :ST2 WHERE id = :id AND created_at >= to_timestamp(:ts) AND created_at < to_timestamp(:ts + 1

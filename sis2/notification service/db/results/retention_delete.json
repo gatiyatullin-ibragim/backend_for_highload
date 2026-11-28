@@ -1,0 +1,1 @@
+{"method":"DELETE","rows":863999,"delete_s":6.152648042,"wal_mb":97.0,"dead_tuples_after":1016362,"vacuum_s":77.820928028,"size_mb_before":5560,"size_mb_after_vacuum":5560}

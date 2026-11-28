@@ -35,3 +35,52 @@ RUN_3000_RPS=1 LOAD_TEST_DURATION=10 \
 `NOTIFICATION_GRPC_ADDR` when the service listens on a different address.
 Regular `go test ./client` skips this load test so unit tests do not require a
 running service.
+
+## SIS #3 extension: PostgreSQL storage
+
+SIS 3 is part of this service, not a separate project:
+
+```
+notification service/
+├── notification.proto, pb/      SIS 2: gRPC contract
+├── server/, client/             SIS 2: gRPC server, client, 3000 RPS load test
+├── store/                       SIS 3: Store interface, memory (SIS 2) and postgres implementations
+└── db/                          SIS 3: database tuning
+    ├── REPORT.md                report with before/after measurements (p95/p99)
+    ├── sql/                     schemas v0-v2w, indexes, SIS 2 extension (idempotency)
+    ├── bench/, infra/           reproducible benchmark, PostgreSQL/PgBouncer/replica setup
+    ├── explain/, results/, charts/   EXPLAIN plans, raw results, charts
+    └── DEFENSE_NOTES_RU.md      notes for the defense
+```
+
+
+The in-memory maps from SIS 2 now sit behind a `store.Store` interface (`store/`).
+`STORE=memory` (default) keeps the SIS 2 behaviour; `STORE=postgres` uses the database tuned in
+[`db/`](db/) (schema v2w: weekly partitions, covering/composite indexes).
+
+How the SIS 3 decisions show up in the code (`store/postgres.go`):
+
+| SIS 3 decision | Where |
+|---|---|
+| PgBouncer, transaction pooling | `DATABASE_URL` points to `:6432`; pgx runs in `QueryExecModeCacheDescribe` (no named prepared statements) |
+| Read replica | `DATABASE_RO_URL` (`notif_ro`) is used by `GetStatus` |
+| Read-your-writes | statuses younger than 3 s are read from the primary (replica lag measured up to 124 ms) |
+| Partition pruning | `notification_id = "<id>-<unix seconds>"`, the lookup filters `created_at` to that second |
+| Idempotency | table `idempotency_keys` (`db/sql/sis2_extension.sql`), one short transaction with the inbox insert |
+
+Run:
+
+```bash
+# 1. database (fresh one)
+createdb notif
+psql notif -f db/sql/v2_schema.sql \
+           -f db/sql/v2_indexes.sql \
+           -f db/sql/sis2_extension.sql
+# 2. dependencies (first time only)
+go get github.com/jackc/pgx/v5@latest && go mod tidy
+# 3. service
+STORE=postgres DATABASE_URL='postgres://postgres@127.0.0.1:5432/notif?sslmode=disable' go run server/main.go
+```
+
+Without PgBouncer/replica point `DATABASE_URL` to Postgres directly and leave `DATABASE_RO_URL` empty.
+The 3000 RPS load test from the previous section works unchanged against either store.

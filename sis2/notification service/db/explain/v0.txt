@@ -1,0 +1,162 @@
+=================== prefs_lookup_1 (v0) ===================
+SELECT user_id, push_on, email_on, sms_on, quiet_from, quiet_to, tz, locale FROM user_preferences WHERE user_id = 12345;
+-------------------
+Index Scan using user_preferences_pkey on user_preferences  (cost=0.42..2.64 rows=1 width=44) (actual time=0.030..0.030 rows=1 loops=1)
+  Index Cond: (user_id = 12345)
+  Buffers: shared hit=7
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=82
+Planning Time: 0.207 ms
+Execution Time: 0.053 ms
+
+=================== prefs_lookup_2_devices (v0) ===================
+SELECT platform, token FROM devices WHERE user_id = 12345;
+-------------------
+Gather  (cost=1000.00..9433.53 rows=2 width=71) (actual time=21.922..23.728 rows=2 loops=1)
+  Workers Planned: 2
+  Workers Launched: 2
+  Buffers: shared hit=6350
+  ->  Parallel Seq Scan on devices  (cost=0.00..8433.33 rows=1 width=71) (actual time=7.472..16.125 rows=1 loops=3)
+        Filter: (user_id = 12345)
+        Rows Removed by Filter: 133333
+        Buffers: shared hit=6350
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=94
+Planning Time: 0.384 ms
+Execution Time: 23.759 ms
+
+=================== inbox_page (v0) ===================
+SELECT id, created_at, channel, title, is_read FROM notifications WHERE user_id = 12345 ORDER BY created_at DESC, id DESC LIMIT 20;
+-------------------
+Limit  (cost=149.12..149.17 rows=20 width=44) (actual time=0.272..0.275 rows=20 loops=1)
+  Buffers: shared hit=125
+  ->  Sort  (cost=149.12..149.44 rows=129 width=44) (actual time=0.272..0.273 rows=20 loops=1)
+        Sort Key: created_at DESC, id DESC
+        Sort Method: top-N heapsort  Memory: 27kB
+        Buffers: shared hit=125
+        ->  Index Scan using notifications_user_idx on notifications  (cost=0.44..145.69 rows=129 width=44) (actual time=0.041..0.238 rows=113 loops=1)
+              Index Cond: (user_id = 12345)
+              Buffers: shared hit=119
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=105
+Planning Time: 0.219 ms
+Execution Time: 0.292 ms
+
+=================== inbox_older (v0) ===================
+SELECT id, created_at, channel, title, is_read FROM notifications WHERE user_id = 12345 AND created_at < now() - 10 * interval '1 day' ORDER BY created_at DESC, id DESC LIMIT 20;
+-------------------
+Limit  (cost=149.00..149.05 rows=20 width=44) (actual time=0.250..0.252 rows=20 loops=1)
+  Buffers: shared hit=125
+  ->  Sort  (cost=149.00..149.22 rows=88 width=44) (actual time=0.249..0.250 rows=20 loops=1)
+        Sort Key: created_at DESC, id DESC
+        Sort Method: top-N heapsort  Memory: 27kB
+        Buffers: shared hit=125
+        ->  Index Scan using notifications_user_idx on notifications  (cost=0.44..146.66 rows=88 width=44) (actual time=0.032..0.215 rows=70 loops=1)
+              Index Cond: (user_id = 12345)
+              Filter: (created_at < (now() - '10 days'::interval))
+              Rows Removed by Filter: 43
+              Buffers: shared hit=119
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=105
+Planning Time: 0.320 ms
+Execution Time: 0.270 ms
+
+=================== unread_count (v0) ===================
+SELECT count(*) FROM notifications WHERE user_id = 12345 AND NOT is_read;
+-------------------
+Aggregate  (cost=145.74..145.75 rows=1 width=8) (actual time=0.224..0.225 rows=1 loops=1)
+  Buffers: shared hit=119
+  ->  Index Scan using notifications_user_idx on notifications  (cost=0.44..145.69 rows=19 width=0) (actual time=0.052..0.221 rows=19 loops=1)
+        Index Cond: (user_id = 12345)
+        Filter: (NOT is_read)
+        Rows Removed by Filter: 94
+        Buffers: shared hit=119
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=85
+Planning Time: 0.192 ms
+Execution Time: 0.255 ms
+
+=================== mark_read (v0) ===================
+UPDATE notifications SET is_read = true WHERE user_id = 12345 AND NOT is_read;
+-------------------
+Update on notifications  (cost=0.44..145.69 rows=0 width=0) (actual time=0.399..0.400 rows=0 loops=1)
+  Buffers: shared hit=323
+  ->  Index Scan using notifications_user_idx on notifications  (cost=0.44..145.69 rows=19 width=7) (actual time=0.055..0.199 rows=19 loops=1)
+        Index Cond: (user_id = 12345)
+        Filter: (NOT is_read)
+        Rows Removed by Filter: 94
+        Buffers: shared hit=122
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=82
+Planning Time: 0.227 ms
+Execution Time: 0.434 ms
+
+=================== insert (v0) ===================
+INSERT INTO notifications (id, user_id, created_at, channel, title, body, status, is_read) VALUES (nextval('notif_id_seq'), 12345, now(), 'push', 'Your order has shipped', 'Track your parcel in the app', 'accepted', false);
+-------------------
+Insert on notifications  (cost=0.00..0.01 rows=0 width=0) (actual time=0.426..0.426 rows=0 loops=1)
+  Buffers: shared hit=66 read=1 dirtied=1
+  I/O Timings: shared read=0.154
+  ->  Result  (cost=0.00..0.01 rows=1 width=153) (actual time=0.028..0.028 rows=1 loops=1)
+        Buffers: shared hit=13
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=3
+Planning Time: 0.038 ms
+Execution Time: 0.437 ms
+
+=================== status_update (v0) ===================
+UPDATE notifications SET status = 'delivered' WHERE id = 25000000 AND created_at >= to_timestamp(1795541200) AND created_at < to_timestamp(1795541200 + 1);
+-------------------
+Update on notifications  (cost=0.44..2.66 rows=0 width=0) (actual time=0.112..0.112 rows=0 loops=1)
+  Buffers: shared hit=21
+  ->  Index Scan using notifications_pkey on notifications  (cost=0.44..2.66 rows=1 width=38) (actual time=0.034..0.037 rows=1 loops=1)
+        Index Cond: (id = 25000000)
+        Filter: ((created_at >= '2026-11-24 22:26:40+05'::timestamp with time zone) AND (created_at < '2026-11-24 22:26:41+05'::timestamp with time zone))
+        Buffers: shared hit=9
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=87
+Planning Time: 0.216 ms
+Execution Time: 0.141 ms
+
+=================== fanout (v0) ===================
+SELECT p.user_id, d.token FROM user_preferences p JOIN devices d ON d.user_id = p.user_id WHERE p.push_on AND p.user_id > 100000 ORDER BY p.user_id LIMIT 1000;
+-------------------
+Limit  (cost=17112.06..17228.73 rows=1000 width=73) (actual time=146.855..152.635 rows=1000 loops=1)
+  Buffers: shared hit=7859
+  ->  Gather Merge  (cost=17112.06..35033.31 rows=153600 width=73) (actual time=146.853..152.575 rows=1000 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=7859
+        ->  Sort  (cost=16112.03..16304.03 rows=76800 width=73) (actual time=142.436..142.461 rows=544 loops=3)
+              Sort Key: p.user_id
+              Sort Method: top-N heapsort  Memory: 181kB
+              Buffers: shared hit=7859
+              Worker 0:  Sort Method: top-N heapsort  Memory: 181kB
+              Worker 1:  Sort Method: top-N heapsort  Memory: 181kB
+              ->  Parallel Hash Join  (cost=3446.99..11901.17 rows=76800 width=73) (actual time=51.494..126.127 rows=61306 loops=3)
+                    Hash Cond: (d.user_id = p.user_id)
+                    Buffers: shared hit=7843
+                    ->  Parallel Seq Scan on devices d  (cost=0.00..8016.67 rows=166667 width=73) (actual time=0.005..25.271 rows=133333 loops=3)
+                          Buffers: shared hit=6350
+                    ->  Parallel Hash  (cost=2766.52..2766.52 rows=54438 width=8) (actual time=23.990..23.991 rows=30653 loops=3)
+                          Buckets: 131072  Batches: 1  Memory Usage: 4672kB
+                          Buffers: shared hit=1397
+                          ->  Parallel Index Scan using user_preferences_pkey on user_preferences p  (cost=0.42..2766.52 rows=54438 width=8) (actual time=0.037..12.931 rows=30653 loops=3)
+                                Index Cond: (user_id > 100000)
+                                Filter: push_on
+                                Rows Removed by Filter: 2680
+                                Buffers: shared hit=1397
+Settings: effective_cache_size = '5GB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', jit = 'off'
+Planning:
+  Buffers: shared hit=145
+Planning Time: 0.438 ms
+Execution Time: 152.748 ms
+

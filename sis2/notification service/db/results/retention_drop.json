@@ -1,0 +1,1 @@
+{"method":"DROP PARTITION","rows":864000,"drop_s":0.115269844,"wal_mb":0.087,"dead_tuples_after":0}

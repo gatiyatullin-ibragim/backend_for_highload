@@ -2,102 +2,103 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"net"
-	"sync"
+	"os"
+	"time"
 
 	pb "notification-service/pb"
+	"notification-service/store"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// Server реализует интерфейс NotificationServiceServer
+// Server реализует NotificationServiceServer; всё состояние лежит в store.Store.
 type Server struct {
-	//заглушка
 	pb.UnimplementedNotificationServiceServer
-
-	mu            sync.RWMutex
-	notifications map[string]string // Хранилище статусов
-	processedKeys map[string]string // Хранилище для идемпотентности (ключ -> id уведомления)
+	store store.Store
 }
 
-// 1. Метод принятия уведомления с поддержкой идемпотентности
+// 1. Приём уведомления с идемпотентностью (ключ хранится в БД, см. db/sql/sis2_extension.sql)
 func (s *Server) SendNotification(ctx context.Context, req *pb.SendRequest) (*pb.SendResponse, error) {
-	//лок блокирует доступ к мапе для остальных горутин обеспечивая потокобезопасность
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	// Получаем ключ идемпотентности из запроса
-	clientKey := req.GetIdempotencyKey()
-
-	// Проверяем, обрабатывали ли мы этот запрос ранее
-	if clientKey != "" {
-		if existingNotifID, found := s.processedKeys[clientKey]; found {
-			log.Printf("[gRPC] Idempotent hit! Key: %s -> Returning existing ID: %s", clientKey, existingNotifID)
-			return &pb.SendResponse{
-				NotificationId: existingNotifID,
-				Status:         "accepted (idempotent)",
-			}, nil
-		}
+	id, created, err := s.store.Create(ctx, store.NewNotification{
+		IdempotencyKey: req.GetIdempotencyKey(),
+		UserID:         req.GetUserId(),
+		TemplateID:     req.GetTemplateId(),
+		Channel:        req.GetChannel(),
+		Payload:        req.GetPayload(),
+	})
+	if err != nil {
+		return nil, toGRPCError(err)
 	}
-
-	// Генерируем новый ID уведомления
-	notifID := fmt.Sprintf("notif-%d", len(s.notifications)+1)
-
-	// Сохраняем в «базу»
-	s.notifications[notifID] = "accepted"
-
-	// Запоминаем ключ, чтобы повторный запрос сработал идемпотентно
-	if clientKey != "" {
-		s.processedKeys[clientKey] = notifID
+	if !created {
+		log.Printf("[gRPC] Idempotent hit! Key: %s -> existing ID: %s", req.GetIdempotencyKey(), id)
+		return &pb.SendResponse{NotificationId: id, Status: "accepted (idempotent)"}, nil
 	}
-
-	log.Printf("[gRPC] Created new notification: %s for user: %s", notifID, req.GetUserId())
-
-	return &pb.SendResponse{
-		NotificationId: notifID,
-		Status:         "accepted",
-	}, nil
+	return &pb.SendResponse{NotificationId: id, Status: "accepted"}, nil
 }
 
-// 2. Метод получения статуса
+// 2. Статус уведомления
 func (s *Server) GetStatus(ctx context.Context, req *pb.StatusRequest) (*pb.StatusResponse, error) {
-	//ReadLock потому что только читаем данные и ничего не записываем
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	notifID := req.GetNotificationId()
-	currentStatus, exists := s.notifications[notifID]
-	if !exists {
-		return nil, status.Errorf(codes.NotFound, "notification %s not found", notifID)
+	st, err := s.store.Status(ctx, req.GetNotificationId())
+	if err != nil {
+		return nil, toGRPCError(err)
 	}
+	return &pb.StatusResponse{NotificationId: req.GetNotificationId(), Status: st}, nil
+}
 
-	return &pb.StatusResponse{
-		NotificationId: notifID,
-		Status:         currentStatus,
-	}, nil
+func toGRPCError(err error) error {
+	switch {
+	case errors.Is(err, store.ErrNotFound):
+		return status.Error(codes.NotFound, "notification not found")
+	case errors.Is(err, store.ErrInvalid):
+		return status.Error(codes.InvalidArgument, err.Error())
+	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, context.Canceled):
+		return status.FromContextError(err).Err()
+	default:
+		log.Printf("[store] error: %v", err)
+		return status.Error(codes.Internal, "internal error")
+	}
+}
+
+func env(k, def string) string {
+	if v := os.Getenv(k); v != "" {
+		return v
+	}
+	return def
+}
+
+// STORE=memory (по умолчанию, как в SIS 2) или STORE=postgres (БД из SIS 3).
+func newStore(ctx context.Context) (store.Store, error) {
+	if env("STORE", "memory") != "postgres" {
+		return store.NewMemory(), nil
+	}
+	return store.NewPostgres(ctx,
+		env("DATABASE_URL", "postgres://postgres@127.0.0.1:6432/notif?sslmode=disable"),
+		os.Getenv("DATABASE_RO_URL"), // пусто => читаем с primary
+		3*time.Second)
 }
 
 func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	st, err := newStore(ctx)
+	cancel()
+	if err != nil {
+		log.Fatalf("store: %v", err)
+	}
+	defer st.Close()
+
 	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-
 	grpcServer := grpc.NewServer()
+	pb.RegisterNotificationServiceServer(grpcServer, &Server{store: st})
 
-	// Инициализируем сервер и обе мапы (для статусов и для идемпотентности)
-	notificationServer := &Server{
-		notifications: make(map[string]string),
-		processedKeys: make(map[string]string),
-	}
-
-	pb.RegisterNotificationServiceServer(grpcServer, notificationServer)
-
-	log.Println("gRPC server is running on port :50051...")
+	log.Printf("gRPC server is running on :50051 (STORE=%s)", env("STORE", "memory"))
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
